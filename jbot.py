@@ -9,6 +9,12 @@ intents.message_content = True
 
 load_dotenv()
 
+BANNED_WORDS = [
+    "nigger",
+    "nigga",
+    "test"
+]
+
 TOKEN = os.getenv("DISCORD_TOKEN")
 client = discord.Client(command_prefix='-', intents=intents)
 
@@ -32,15 +38,23 @@ async def on_message(message):
             await message.channel.send("General Kenobi!")
             return
         
+    for word in BANNED_WORDS:
+        if word in user_message.lower():
+            try: 
+                await message.delete()
+                await message.channel.send(f"{username} watch your language!")
+                break
+            except discord.errors.Forbidden:
+                print(f"Could not delete message from {username} due to lack of permissions")
+        
 @client.event
 async def on_member_join(member):
     role = discord.utils.get(member.guild.roles, name="Member")
 
     if role:
         await member.add_roles(role)
+        return
     else:
-        pass
-
-    print("User joined")
+        return
 
 client.run(TOKEN)
