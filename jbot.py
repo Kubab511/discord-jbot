@@ -12,7 +12,17 @@ load_dotenv()
 BANNED_WORDS = [
     "nigger",
     "nigga",
+    "retard",
+    "bastard",
     "test"
+]
+
+PIRACY = [
+    "sp",
+    "simplaza",
+    "rutracker",
+    "suprbay",
+    "pirates-forum"
 ]
 
 TOKEN = os.getenv("DISCORD_TOKEN")
@@ -28,8 +38,6 @@ async def on_message(message):
     channel = str(message.channel.name)
     user_message = str(message.content)
 
-    print(f"Message {user_message} by {username} in {channel}")
-
     if message.author == client.user:
         return
     
@@ -38,15 +46,25 @@ async def on_message(message):
             await message.channel.send("General Kenobi!")
             return
         
-    for word in BANNED_WORDS:
-        if word in user_message.lower():
-            try: 
-                await message.delete()
-                await message.channel.send(f"{username} watch your language!")
-                break
-            except discord.errors.Forbidden:
-                print(f"Could not delete message from {username} due to lack of permissions")
-        
+    if username != "kubab511":
+        for word in BANNED_WORDS:
+            if word in user_message.lower():
+                try: 
+                    await message.delete()
+                    await message.channel.send(f"{username} watch your language!")
+                    break
+                except discord.errors.Forbidden:
+                    print(f"Could not delete message from {username} due to lack of permissions")
+
+        for word in PIRACY:
+            if word in user_message.lower():
+                try:
+                    await message.delete()
+                    await message.channel.send(f"{username} rule 7.")
+                    break
+                except discord.errors.Forbidden:
+                    print(f"Could not delete message from {username} due to lack of permissions")
+
 @client.event
 async def on_member_join(member):
     role = discord.utils.get(member.guild.roles, name="Member")
