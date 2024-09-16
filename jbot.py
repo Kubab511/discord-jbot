@@ -5,7 +5,9 @@ intents = discord.Intents.default()
 intents.typing = False
 intents.presences = False
 intents.members = True
+intents.messages = True
 intents.message_content = True
+intents.guilds = True
 
 load_dotenv()
 
@@ -26,6 +28,7 @@ PIRACY = [
 ]
 
 TOKEN = os.getenv("DISCORD_TOKEN")
+CHANNEL_ID = os.getenv("CHANNEL_ID")
 client = discord.Client(command_prefix='-', intents=intents)
 
 @client.event
@@ -56,7 +59,7 @@ async def on_message(message):
             if word in user_message.lower():
                 try:
                     await message.delete()
-                    await message.channel.send(f"{username} rule 7.")
+                    await message.channel.send(f"{username} **rule 7**.")
                     break
                 except discord.errors.Forbidden:
                     print(f"Could not delete message from {username} due to lack of permissions")
@@ -69,4 +72,32 @@ async def on_member_join(member):
         await member.add_roles(role)
         return
     
+@client.event
+async def on_ready():
+    send = True
+    channel = await client.fetch_channel(CHANNEL_ID)
+    message_content = "React to give yourself a role.\n🎉: `Profile Releases`\n⚙️: `Profile Updates`"
+
+    async for message in channel.history(limit=5):
+        if message.content == message_content:
+            send = False
+            break
+    
+    if send:
+        message = await channel.send(message_content)
+        await message.add_reaction("🎉")
+        await message.add_reaction("⚙️")
+
+@client.event
+async def on_reaction_add(reaction, user):
+    channel = await client.fetch_channel(CHANNEL_ID)
+    if reaction.message.channel.id != channel.id:
+        return
+    if reaction.emoji == "🎉":
+        role = discord.utils.get(user.guild.roles, name="Profile Releases")
+        await user.add_roles(role)
+    if reaction.emoji == "⚙️":
+        role = discord.utils.get(user.guild.roles, name="Profile Updates")
+        await user.add_roles(role)
+
 client.run(TOKEN)
