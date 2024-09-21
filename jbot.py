@@ -12,10 +12,6 @@ intents.guilds = True
 load_dotenv()
 
 BANNED_WORDS = [
-    "nigger",
-    "nigga",
-    "retard",
-    "bastard",
     "test"
 ]
 
@@ -99,5 +95,17 @@ async def on_reaction_add(reaction, user):
     if reaction.emoji == "⚙️":
         role = discord.utils.get(user.guild.roles, name="Profile Updates")
         await user.add_roles(role)
+
+@client.event
+async def on_reaction_remove(reaction, user):
+    channel = await client.fetch_channel(CHANNEL_ID)
+    if reaction.message.channel.id != channel.id:
+        return
+    if reaction.emoji == "🎉":
+        role = discord.utils.get(user.guild.roles, name="Profile Releases")
+        await user.remove_roles(role)
+    if reaction.emoji == "⚙️":
+        role = discord.utils.get(user.guild.roles, name="Profile Updates")
+        await user.remove_roles(role)
 
 client.run(TOKEN)
